@@ -171,33 +171,6 @@ body {
     z-index: 100;
 }
 
-/* RESPONSIVE */
-@media (max-width: 768px) {
-    body {
-        overflow-y: auto; /* allow Y-scroll on small screens */
-    }
-	
-	    #templateOverlay {
-        overflow-y: auto; /* scroll only inside overlay on small screens */
-    }
-	
-    #contentLayer {
-        flex-direction: column;
-		padding: 50px 20px 60px;
-	    gap: 30px;
-    }
-	
-    #contentLayer video,#gameContainer {
-        width: 100%;
-    }
-	
-	.box img.star {
-    width: 30px;  
-    height: 30px;
-    }
-}
-
-
 /* ================= MOBILE (browser-detected) ================= */
 body.mobile {
     overflow-y: auto; /* allow scrolling on mobile */
@@ -435,6 +408,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html>
+
 
 
 
