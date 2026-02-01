@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<title> Avoid the Money </title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    background-color: #222;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+/* UI */
+#ui {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: white;
+    font-size: 20px;
+    display: none;
+}
+
+#message {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    color: white;
+    background: rgba(0,0,0,0.7);
+    text-align: center;
+}
+
+/* PLAYER IMAGE */
+#player {
+    position: absolute;
+    bottom: 40px;
+    width: 50px;
+    height: 50px;
+    background: url("./assets/Player.png") center/contain no-repeat;
+}
+
+/* ENEMY IMAGE */
+#enemy {
+    position: absolute;
+    top: 40px;
+    width: 70px;
+    height: 70px;
+    background: url("./assets/Enemy.png") center/contain no-repeat;
+}
+
+/* PROJECTILES */
+.projectile.small {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: url("./assets/SmallAttack.png") center/contain no-repeat;
+}
+
+.projectile.large {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: url("./assets/BigAttack.png") center/contain no-repeat;
+}
+</style>
+</head>
+
+<body>
+
+<div id="ui">Time: <span id="time">30</span></div>
+<div id="message">CLICK HERE<br>AND PRESS SPACE TO START</div>
+
+<div id="player"></div>
+<div id="enemy"></div>
+
+<script>
+/* Elements */
+const player = document.getElementById("player");
+const enemy = document.getElementById("enemy");
+const timeEl = document.getElementById("time");
+const message = document.getElementById("message");
+const ui = document.getElementById("ui");
+
+/* Game state */
+let keys = {};
+let projectiles = [];
+let gameStarted = false;
+let gameOver = false;
+let timeLeft = 5;
+let hasRestarted = false;
+let rewardGiven = false;
+
+/* Positions */
+let playerX = window.innerWidth / 2 - 25;
+let enemyX = window.innerWidth / 2 - 35;
+
+/* Enemy random movement */
+let enemyDir = Math.random() < 0.5 ? -1 : 1;
+
+/* Speeds */
+const playerSpeed = 6;
+const enemySpeed = 6.75;
+
+/* Input - Keyboard */
+document.addEventListener("keydown", e => {
+    keys[e.key] = true;
+
+    if (!gameStarted && e.code === "Space") {
+        startGame();
+    }
+
+    if (gameOver && e.key.toLowerCase() === "r") {
+        hasRestarted = true;
+        resetGame();
+    }
+});
+document.addEventListener("keyup", e => keys[e.key] = false);
+
+/* Input - Touch for mobile */
+document.addEventListener("touchstart", e => {
+    const touch = e.touches[0];
+    const screenWidth = window.innerWidth;
+
+    if (!gameStarted) {
+        startGame();
+        return;
+    }
+
+    if (gameOver) {
+        hasRestarted = true;
+        resetGame();
+        return;
+    }
+
+    if (touch.clientX < screenWidth / 2) {
+        keys["ArrowLeft"] = true;
+    } else {
+        keys["ArrowRight"] = true;
+    }
+});
+
+document.addEventListener("touchend", e => {
+    keys["ArrowLeft"] = false;
+    keys["ArrowRight"] = false;
+});
+
+/* Start game */
+function startGame() {
+    gameStarted = true;
+    message.style.display = "none";
+    ui.style.display = "block";
+    startTimer();
+    startShooting();
+}
+
+/* Reset game */
+function resetGame() {
+    gameOver = false;
+    gameStarted = true;
+    timeLeft = 5;
+    timeEl.textContent = timeLeft;
+
+    projectiles.forEach(p => p.remove());
+    projectiles = [];
+
+    playerX = window.innerWidth / 2 - 25;
+    enemyX = window.innerWidth / 2 - 35;
+
+    enemyDir = Math.random() < 0.5 ? -1 : 1;
+
+    message.style.display = "none";
+    ui.style.display = "block";
+}
+
+/* Timer */
+function startTimer() {
+    setInterval(() => {
+        if (!gameStarted || gameOver) return;
+        timeLeft--;
+        timeEl.textContent = timeLeft;
+        if (timeLeft <= 0) win();
+    }, 1000);
+}
+
+/* Enemy random direction change */
+setInterval(() => {
+    if (!gameStarted || gameOver) return;
+    enemyDir = Math.random() < 0.5 ? -1 : 1;
+}, 700);
+
+/* Shooting */
+function startShooting() {
+    setInterval(() => {
+        if (!gameStarted || gameOver) return;
+        shootProjectile();
+    }, 600);
+}
+
+function shootProjectile() {
+    const proj = document.createElement("div");
+    const isLarge = Math.random() < 0.4;
+
+    proj.classList.add("projectile", isLarge ? "large" : "small");
+    proj.x = enemyX + enemy.offsetWidth / 2;
+    proj.y = enemy.offsetTop + enemy.offsetHeight;
+    proj.speed = isLarge ? 4 : 5.5;
+
+    document.body.appendChild(proj);
+    projectiles.push(proj);
+}
+
+/* Main loop */
+function update() {
+    if (!gameStarted || gameOver) {
+        requestAnimationFrame(update);
+        return;
+    }
+
+    /* Player */
+    if (keys["ArrowLeft"]) playerX -= playerSpeed;
+    if (keys["ArrowRight"]) playerX += playerSpeed;
+
+    playerX = Math.max(0, Math.min(window.innerWidth - player.offsetWidth, playerX));
+    player.style.left = playerX + "px";
+
+    /* Enemy */
+    enemyX += enemySpeed * enemyDir;
+    if (enemyX <= 0 || enemyX + enemy.offsetWidth >= window.innerWidth) {
+        enemyDir *= -1;
+    }
+    enemy.style.left = enemyX + "px";
+
+    /* Projectiles */
+    projectiles.forEach((p, i) => {
+        p.y += p.speed;
+        p.style.left = p.x + "px";
+        p.style.top = p.y + "px";
+
+        if (collision(p, player)) lose();
+
+        if (p.y > window.innerHeight) {
+            p.remove();
+            projectiles.splice(i, 1);
+        }
+    });
+
+    requestAnimationFrame(update);
+}
+
+/* Collision */
+function collision(a, b) {
+    const r1 = a.getBoundingClientRect();
+    const r2 = b.getBoundingClientRect();
+    return !(
+        r1.top > r2.bottom ||
+        r1.bottom < r2.top ||
+        r1.left > r2.right ||
+        r1.right < r2.left
+    );
+}
+
+/* End states */
+function lose() {
+    gameOver = true;
+    message.style.display = "flex";
+    message.innerHTML = "YOU LOST<br>Tap to Restart";
+}
+
+function win() {
+    if (!rewardGiven) {
+        rewardGiven = true;
+        gameOver = true;
+        message.style.display = "flex";
+        message.innerHTML = "YOU WIN!";
+        window.parent.postMessage({ action: "getRedStar" }, "*");
+    }
+}
+
+/* Initial state */
+if (hasRestarted) {
+    message.style.display = "none";
+    gameStarted = true;
+    ui.style.display = "block";
+}
+
+/* Loop */
+update();
+</script>
+
+</body>
+</html>

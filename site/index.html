@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="./images/favicon.ico">
+<title>TEMP SITE</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* IMPORTANT: NO HEIGHT LOCK */
+html {
+    width: 100%;
+}
+
+body {
+    min-height: 100vh;
+    background-image: url("./images/background.jpg");
+    background-size: 100vw 100vh;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    font-family: sans-serif;
+
+    overflow-y: hidden;
+}
+
+/* ================= INTRO ================= */
+
+#introOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#introContent {
+    background: black;
+    color: white;
+    padding: 40px 60px;
+    border: 2px solid white;
+    text-align: center;
+}
+
+#introContent h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+#startButton {
+    padding: 12px 30px;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+/* ================= MAP HITBOXES ================= */
+
+#mapHitboxes {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+}
+
+.box {
+    position: absolute;
+    background: black;
+    background: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.box:hover {
+    background: rgba(218, 165, 32, 0.2);
+}
+
+.restaraunt { width: 18%; height: 24%; top: 10%; right: 5%; }
+.tv_studio { width: 10.5%; height: 33%; bottom: 3%; left: 5.25%; }
+.bribe_office { width: 12%; height: 32%; left: 9.25%; top: 5.5%; }
+.brother_house { width: 11%; height: 42%; right: 10.5%; bottom: 2%; }
+.park { width: 43%; height: 53%; top: 45.5%; left: 28.5%; }
+
+.box img.star {
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;  
+    height: 50px;
+    pointer-events: none; /* don’t block clicks */
+    z-index: 50;
+}
+
+
+/* ================= TEMPLATE OVERLAY ================= */
+
+#templateOverlay {
+    position: fixed;
+    inset: 0;
+    background: #222;
+    z-index: 500;
+    display: none;
+
+    overflow-y: hidden;
+}
+
+/* BACK BUTTON */
+#templateOverlay #hitboxes {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+#templateOverlay .box {
+    pointer-events: auto;
+}
+
+#backButton {
+    width: 6%;
+    height: 10%;
+    left: 2%;
+    top: 2%;
+}
+
+/* CONTENT */
+#contentLayer {
+    min-height: 120vh; /* FORCE SCROLL FOR TESTING */
+    display: flex;
+    gap: 15px;
+    padding: 180px 20px 60px;
+    align-items: flex-start;
+    justify-content: space-evenly;
+}
+
+#contentLayer video {
+    width: 45%;
+    max-width: 800px;
+    aspect-ratio: 16 / 9;
+}
+
+#gameContainer {
+    width: 40%;
+    max-width: 800px;
+    border: 2px solid white;
+    padding: 20px;
+    position: relative; 
+
+    display: flex; 
+    justify-content: center;
+}
+
+#gameFrame {
+    width: 100%;
+    height: 350px; /* smaller height */
+    max-height: 400px; /* responsive limit */
+}
+
+#gameCover {
+    position: absolute;
+    inset: 0;
+    background-image: url("./images/temp.png"); 
+    background-size: 100% 100%;
+	background-repeat: no-repeat;
+    background-position: center;
+    z-index: 100;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    body {
+        overflow-y: auto; /* allow Y-scroll on small screens */
+    }
+	
+	    #templateOverlay {
+        overflow-y: auto; /* scroll only inside overlay on small screens */
+    }
+	
+    #contentLayer {
+        flex-direction: column;
+		padding: 50px 20px 60px;
+	    gap: 30px;
+    }
+	
+    #contentLayer video,#gameContainer {
+        width: 100%;
+    }
+	
+	.box img.star {
+    width: 30px;  
+    height: 30px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- INTRO -->
+<div id="introOverlay">
+    <div id="introContent">
+        <h1>MEOW</h1>
+        <button id="startButton">ENTER</button>
+    </div>
+</div>
+
+<!-- MAP -->
+<div id="mapHitboxes">
+    <div class="box restaraunt" data-location="restaraunt"></div>
+    <div class="box tv_studio" data-location="tv_studio"></div>
+    <div class="box bribe_office" data-location="bribe_office"></div>
+    <div class="box brother_house" data-location="brother_house"></div>
+    <div class="box park"></div>
+</div>
+
+<!-- TEMPLATE -->
+<div id="templateOverlay">
+
+    <div id="hitboxes">
+        <div class="box" id="backButton"></div>
+    </div>
+
+    <div id="contentLayer">
+        <video id="mainVideo" controls></video>
+
+        <div id="gameContainer">
+		    <div id="gameCover">   </div> <!-- COVER OF THE GAME FRAME -->
+            <iframe id="gameFrame"
+                    width="100%"
+                    height="100"
+                    frameborder="0"></iframe>
+        </div>
+    </div>
+
+</div>
+
+<script>
+/* ================= GLOBAL BOOLEAN VARIABLES ================= */
+window.redStar = false;
+window.blueStar = false;
+window.greenStar = false;
+window.yellowStar = false;
+
+
+/* INTRO */
+const introOverlay = document.getElementById("introOverlay");
+const startButton = document.getElementById("startButton");
+
+if (sessionStorage.getItem("entered")) {
+    introOverlay.style.display = "none";
+}
+
+startButton.addEventListener("click", () => {
+    sessionStorage.setItem("entered", "true");
+    introOverlay.style.display = "none";
+});
+
+/* TEMPLATE */
+const templateOverlay = document.getElementById("templateOverlay");
+const video = document.getElementById("mainVideo");
+const gameFrame = document.getElementById("gameFrame");
+
+const locationData = {
+    restaraunt: {
+        video: "./videos/restaraunt.mp4",
+        game: "./games/Restaraunt.html"
+    },
+    tv_studio: {
+        video: "./videos/tv.mp4",
+        game: "./games/tv.html"
+    },
+    bribe_office: {
+        video: "./videos/bribe.mp4",
+        game: "./games/bribe.html"
+    },
+    brother_house: {
+        video: "./videos/brother.mp4",
+        game: "./games/brother.html"
+    }
+};
+
+document.querySelectorAll(".box[data-location]").forEach(box => {
+    box.addEventListener("click", () => {
+        const loc = box.dataset.location;
+
+        video.src = locationData[loc].video;
+        gameFrame.src = locationData[loc].game;
+
+        templateOverlay.style.display = "block";
+
+        // show cover
+        document.getElementById("gameCover").style.display = "block";
+
+        // remove previous ended listener
+        video.onended = () => {
+            // hide cover when video ends
+            document.getElementById("gameCover").style.display = "none";
+        };
+    });
+});
+
+/* BACK */
+document.getElementById("backButton").addEventListener("click", () => {
+    templateOverlay.style.display = "none";
+    video.pause();
+    video.src = "";
+    gameFrame.src = "";
+});
+
+
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    // STAR CONFIGURATION
+    const stars = [
+        { selector: ".restaraunt", src: "./images/redStar.png", name: "redStar" },
+        { selector: ".tv_studio", src: "./images/blueStar.png", name: "blueStar" },
+        { selector: ".bribe_office", src: "./images/greenStar.png", name: "greenStar" },
+        { selector: ".brother_house", src: "./images/yellowStar.png", name: "yellowStar" }
+    ];
+
+    const starImages = {};
+
+    // CREATE STAR IMAGES AND APPEND TO BOXES
+    stars.forEach(({selector, src, name}) => {
+        const div = document.querySelector(selector);
+        const img = document.createElement("img");
+        img.src = src;
+        img.classList.add("star");
+        img.style.display = "none"; // hidden initially
+        div.appendChild(img);
+        starImages[name] = img;
+    });
+
+        //  FUNCTIONS FOR EACH STAR
+    window.getRedStar = function() {
+        window.redStar = true;
+        starImages.redStar.style.display = "block";
+        console.log("Red Star obtained!");
+    }
+
+    window.getBlueStar = function() {
+        window.blueStar = true;
+        starImages.blueStar.style.display = "block";
+        console.log("Blue Star obtained!");
+    }
+
+    window.getGreenStar = function() {
+        window.greenStar = true;
+        starImages.greenStar.style.display = "block";
+        console.log("Green Star obtained!");
+    }
+
+    window.getYellowStar = function() {
+        window.yellowStar = true;
+        starImages.yellowStar.style.display = "block";
+        console.log("Yellow Star obtained!");
+    }
+
+
+// Events for calling the functions of each star
+	window.addEventListener("message", (event) => {
+		if(event.data.action === "getRedStar") {
+			getRedStar();
+		}
+	});
+
+
+
+    // continuous check if all stars are obtained
+    setInterval(() => {
+        if(window.redStar && window.blueStar && window.greenStar && window.yellowStar) {
+            console.log(" All stars are obtained!");
+        }
+    }, 1000);
+
+});
+
+
+</script>
+
+</body>
+</html>
