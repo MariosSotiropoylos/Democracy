@@ -197,6 +197,33 @@ body {
     height: 30px;
     }
 }
+
+/* ================= MOBILE (browser-detected) ================= */
+
+body.mobile {
+    overflow-y: auto; /* allow scrolling on mobile */
+}
+
+body.mobile #templateOverlay {
+    overflow-y: auto; /* scroll inside overlay */
+}
+
+body.mobile #contentLayer {
+    flex-direction: column;
+    padding: 50px 20px 60px;
+    gap: 30px;
+}
+
+body.mobile #contentLayer video,
+body.mobile #gameContainer {
+    width: 100%;
+}
+
+body.mobile .box img.star {
+    width: 30px;  
+    height: 30px;
+}
+
 </style>
 </head>
 
@@ -241,6 +268,11 @@ body {
 </div>
 
 <script>
+/* ================= CHECK IF MOBILE ================= */
+const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+if(isMobile) document.body.classList.add("mobile");
+
+
 /* ================= GLOBAL BOOLEAN VARIABLES ================= */
 window.redStar = false;
 window.blueStar = false;
