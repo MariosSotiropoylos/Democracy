@@ -173,7 +173,7 @@ body {
 }
 
 /* RESPONSIVE */
-@media (max-width: 768px) {
+@media (max-width: 480px) {
     body {
         overflow-y: auto; /* allow Y-scroll on small screens */
     }
@@ -196,33 +196,6 @@ body {
     width: 30px;  
     height: 30px;
     }
-}
-
-/* ================= MOBILE (browser-detected) ================= */
-
-body.mobile {
-    overflow-y: auto; /* allow scrolling on mobile */
-}
-
-body.mobile #templateOverlay {
-    overflow-y: auto; /* scroll inside overlay */
-}
-
-body.mobile #contentLayer {
-    flex-direction: column;
-    padding: 0px 0px 60px 0px;
-	margin: 50px auto; 
-    gap: 30px;
-}
-
-body.mobile #contentLayer video,
-body.mobile #gameContainer {
-    width: 100%;
-}
-
-body.mobile .box img.star {
-    width: 30px;  
-    height: 30px;
 }
 
 </style>
@@ -420,5 +393,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html>
+
 
 
