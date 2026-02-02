@@ -91,8 +91,8 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 50px;  
-    height: 50px;
+    width: 35%;  
+    height: auto;
     pointer-events: none; /* don’t block clicks */
     z-index: 50;
 }
@@ -158,7 +158,8 @@ body {
 
 #gameFrame {
     width: 100%;
-    height: 500px; /* smaller height */
+    height: 350px; /* smaller height */
+    max-height: 400px; /* responsive limit */
 }
 
 #gameCover {
@@ -170,6 +171,33 @@ body {
     background-position: center;
     z-index: 100;
 }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    body {
+        overflow-y: auto; /* allow Y-scroll on small screens */
+    }
+	
+	    #templateOverlay {
+        overflow-y: auto; /* scroll only inside overlay on small screens */
+    }
+	
+    #contentLayer {
+        flex-direction: column;
+		padding: 50px 20px 60px;
+	    gap: 30px;
+    }
+	
+    #contentLayer video,#gameContainer {
+        width: 100%;
+    }
+	
+	.box img.star {
+    width: 25%;  
+    height: auto;
+    }
+}
+
 
 /* ================= MOBILE (browser-detected) ================= */
 body.mobile {
@@ -184,7 +212,8 @@ body.mobile #contentLayer {
     display: flex;
     flex-direction: column; /* stack video above game */
     align-items: center;    /* center horizontally */
-    gap: 5px;              /* smaller space between video and game */
+    padding: 20px 10px 30px 10px; /* less top/bottom padding */
+    gap: 15px;              /* smaller space between video and game */
 }
 
 body.mobile #contentLayer video {
@@ -208,8 +237,8 @@ body.mobile #gameFrame {
 }
 
 body.mobile .box img.star {
-    width: 50px;  
-    height: 50px;
+    width: 25%;  
+    height: auto;
 }
 
 </style>
@@ -248,7 +277,7 @@ body.mobile .box img.star {
 		    <div id="gameCover">   </div> <!-- COVER OF THE GAME FRAME -->
             <iframe id="gameFrame"
                     width="100%"
-                    height="100"
+                    height="100%"
                     frameborder="0"></iframe>
         </div>
     </div>
@@ -390,6 +419,24 @@ document.addEventListener("DOMContentLoaded", () => {
 			getRedStar();
 		}
 	});
+	
+		window.addEventListener("message", (event) => {
+		if(event.data.action === "getBlueStar") {
+			getBlueStar();
+		}
+	});
+	
+		window.addEventListener("message", (event) => {
+		if(event.data.action === "getGreenStar") {
+			getGreenStar();
+		}
+	});
+	
+		window.addEventListener("message", (event) => {
+		if(event.data.action === "getYellowStar") {
+			getYellowStar();
+		}
+	});
 
 
 
@@ -407,10 +454,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </body>
 </html>
-
-
-
-
-
-
-
